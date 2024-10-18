@@ -30,10 +30,10 @@ public class ChatRestController {
         this.chatClient = builder.build();
     }
 
-    // Serve the index.html page on root path (GET request)
+    // Serve the home.html page on root path (GET request)
     @GetMapping("/")
     public String index() {
-        return "index"; // Thymeleaf will resolve this to src/main/resources/templates/index.html
+        return "login"; // Thymeleaf will resolve this to src/main/resources/templates/home.html
     }
 
     private String formatResponseAsHtml(String response) {
