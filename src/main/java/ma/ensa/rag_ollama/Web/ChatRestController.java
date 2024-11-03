@@ -10,10 +10,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 @RestController
 @RequestMapping("/chat")
@@ -25,15 +33,52 @@ public class ChatRestController {
     @Value("classpath:/prompts/prompt.st")
     private Resource prompt;
 
+    @Value("${pdf.folder.path}")
+    private String pdfFolderPath;
+
     public ChatRestController(VectorStore vectorStore,ChatClient.Builder builder) {
         this.vectorStore = vectorStore;
         this.chatClient = builder.build();
     }
 
-    // Serve the home.html page on root path (GET request)
+    // what we just add :
+
+    // File upload handler
+    @PostMapping("/upload")
+    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
+        Map<String, String> response = new HashMap<>();
+        if (file.isEmpty()) {
+            response.put("message", "Failed to upload file because it was empty.");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            // Create directory if it doesn't exist
+            Path folderPath = Paths.get(pdfFolderPath);
+            if (!Files.exists(folderPath)) {
+                Files.createDirectories(folderPath);
+            }
+
+            // Save the uploaded file to the pdf folder
+            Path filePath = Paths.get(pdfFolderPath, file.getOriginalFilename());
+            Files.write(filePath, file.getBytes());
+
+            // Here, you could trigger the DataLoader to process the file if needed
+
+            response.put("message", "File uploaded successfully.");
+            response.put("filePath", filePath.toString());  // For debugging or logging
+            return ResponseEntity.ok(response);
+        } catch (IOException e) {
+            response.put("message", "Failed to upload file: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+
+    // Serve the index.html page on root path (GET request)
     @GetMapping("/")
     public String index() {
-        return "login"; // Thymeleaf will resolve this to src/main/resources/templates/home.html
+        return "index"; // Thymeleaf will resolve this to src/main/resources/templates/home.html
     }
 
     private String formatResponseAsHtml(String response) {

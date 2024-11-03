@@ -3,10 +3,9 @@ package ma.ensa.rag_ollama.Web;
 import ma.ensa.rag_ollama.Service.UserService;
 import ma.ensa.rag_ollama.entites.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
+
 
 @Controller
 @RequestMapping("/registration")
